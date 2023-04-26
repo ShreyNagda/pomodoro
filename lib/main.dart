@@ -1,12 +1,15 @@
 // import 'dart:io';
 
 // import 'package:dart_vlc/dart_vlc.dart';
+// import 'dart:html';
 import 'dart:io';
 
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kplayer/kplayer.dart';
 import 'package:pomodoro/model/timer_model.dart';
 import 'package:pomodoro/pages/splash_page.dart';
 import 'package:pomodoro/utils/constants.dart';
@@ -19,13 +22,17 @@ import 'package:window_manager/window_manager.dart';
 late SharedPreferences prefs;
 NotificationService service = NotificationService();
 List<TimerModel> timers = [];
+FlutterLocalNotificationsPlugin localNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    Player.boot();
     // DartVLC.initialize();
     await WindowManager.instance.setMinimumSize(const Size(600, 600));
   }
-  if(Platform.isAndroid){
+  if (Platform.isAndroid) {
     await service.initialize();
   }
   prefs = await SharedPreferences.getInstance();
@@ -37,6 +44,9 @@ Future<void> main() async {
     ),
   );
   runApp(const MyApp());
+  // print('Trying to delete notification');
+  // await service.deleteNotification(0);
+  service.notifications.cancelNotificationsByChannelKey('pomodoro');
 }
 
 Future<void> initializePrefs() async {
@@ -82,6 +92,8 @@ Future<void> initializePrefs() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  // @override
   @override
   Widget build(BuildContext context) {
     return Resize(
