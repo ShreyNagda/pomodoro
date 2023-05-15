@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_linux
   awesome_notifications
-  dart_vlc
   screen_retriever
   window_manager
 )

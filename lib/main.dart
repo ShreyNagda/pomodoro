@@ -1,17 +1,17 @@
-// import 'dart:io';
-
-// import 'package:dart_vlc/dart_vlc.dart';
-// import 'dart:html';
+import 'dart:async';
 import 'dart:io';
 
+import 'package:cron/cron.dart';
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kplayer/kplayer.dart';
 import 'package:pomodoro/model/timer_model.dart';
-import 'package:pomodoro/pages/splash_page.dart';
+import 'package:pomodoro/pages/home_page.dart';
+import 'package:pomodoro/pages/on_boarding.dart';
+import 'package:pomodoro/pages/settings_page.dart';
 import 'package:pomodoro/utils/constants.dart';
 import 'package:pomodoro/utils/notification_service.dart';
 import 'package:resize/resize.dart';
@@ -20,19 +20,32 @@ import 'package:wakelock/wakelock.dart';
 import 'package:window_manager/window_manager.dart';
 
 late SharedPreferences prefs;
+late bool isMobile;
+late bool isTablet;
+late bool isWindows;
+late bool isWeb;
 NotificationService service = NotificationService();
 List<TimerModel> timers = [];
-FlutterLocalNotificationsPlugin localNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+// late AudioPlayer audioPlayer;
+late double width;
+late double spacer;
+late Cron cron;
+
 Future<void> main() async {
+  cron = Cron();
+
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  if (kIsWeb) {
+  } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    WindowManager.instance.setMinimumSize(const Size(400, 400));
     Player.boot();
-    // DartVLC.initialize();
-    await WindowManager.instance.setMinimumSize(const Size(600, 600));
-  }
-  if (Platform.isAndroid) {
+  } else if (Platform.isAndroid) {
     await service.initialize();
   }
   prefs = await SharedPreferences.getInstance();
@@ -44,9 +57,6 @@ Future<void> main() async {
     ),
   );
   runApp(const MyApp());
-  // print('Trying to delete notification');
-  // await service.deleteNotification(0);
-  service.notifications.cancelNotificationsByChannelKey('pomodoro');
 }
 
 Future<void> initializePrefs() async {
@@ -57,13 +67,34 @@ Future<void> initializePrefs() async {
   if (!prefs.containsKey(Constants.autoStartPomodoroKey)) {
     prefs.setBool(Constants.autoStartPomodoroKey, false);
   }
-  if (!prefs.containsKey(Constants.wakeLockKey)) {
-    prefs.setBool(Constants.wakeLockKey, false);
+  if (!prefs.containsKey(Constants.numberOfBreaksKey)) {
+    prefs.setInt(Constants.numberOfBreaksKey, 4);
   }
-  if (prefs.getBool(Constants.wakeLockKey)!) {
-    Wakelock.enable();
-  } else {
-    Wakelock.enable();
+  if (!prefs.containsKey(Constants.pomodoroCompletedKey)) {
+    prefs.setInt(Constants.pomodoroCompletedKey, 0);
+  }
+
+  cron.schedule(Schedule.parse("* 0 * * *"), () {
+    print(DateTime.now());
+    prefs.setInt(Constants.pomodoroCompletedKey, 0);
+    // print(prefs.getInt(Constants.pomodoroCompletedKey));
+  });
+
+  if (!prefs.containsKey(Constants.dailyGoalKey)) {
+    prefs.setInt(Constants.dailyGoalKey, 8);
+  }
+  if (!kIsWeb && Platform.isAndroid) {
+    if (!prefs.containsKey(Constants.wakeLockKey)) {
+      prefs.setBool(Constants.wakeLockKey, false);
+    }
+    if (prefs.getBool(Constants.wakeLockKey)!) {
+      Wakelock.enable();
+    } else {
+      Wakelock.enable();
+    }
+  }
+  if (!prefs.containsKey(Constants.firstTimeOpen)) {
+    prefs.setBool(Constants.firstTimeOpen, true);
   }
   if (!prefs.containsKey(Constants.timerKey)) {
     timers = [
@@ -99,18 +130,35 @@ class MyApp extends StatelessWidget {
     return Resize(
       allowtextScaling: true,
       builder: () {
+        isMobile = ResizeUtil().deviceType == DeviceType.Mobile;
+        isTablet = ResizeUtil().deviceType == DeviceType.Tablet;
+        isWindows = ResizeUtil().deviceType == DeviceType.Windows;
+        isWeb = ResizeUtil().deviceType == DeviceType.Web;
+        print(isTablet);
         return DynamicColorTheme(
           data: (Color color, bool isDark) {
             return buildTheme(color, isDark);
           },
           themedWidgetBuilder: (BuildContext context, ThemeData data) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: const SplashPage(),
-              theme: data,
-            );
+            // print(Colors.primaries.first.shade300.toString());
+            return LayoutBuilder(builder: (context, constraints) {
+              width = constraints.maxWidth;
+              spacer = width / 10;
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: prefs.getBool(Constants.firstTimeOpen)!
+                    ? const OnBoardingScreen()
+                    : const HomePage(),
+                theme: data,
+                routes: {
+                  "/home": (context) => const HomePage(),
+                  "/settings": (context) => const SettingsPage(),
+                  "/onboarding": (context) => const OnBoardingScreen()
+                },
+              );
+            });
           },
-          defaultColor: Colors.primaries.first.shade300,
+          defaultColor: Constants.colors.first,
           defaultIsDark: false,
         );
       },
@@ -126,14 +174,17 @@ class MyApp extends StatelessWidget {
       scaffoldBackgroundColor: color,
       appBarTheme: const AppBarTheme(
           color: Colors.transparent, centerTitle: true, elevation: 0),
-      floatingActionButtonTheme: base.floatingActionButtonTheme.copyWith(
-        backgroundColor: color,
-      ),
+      floatingActionButtonTheme:
+          base.floatingActionButtonTheme.copyWith(backgroundColor: color),
       iconTheme: base.iconTheme.copyWith(
-        color: accentColor,
-        size: 2.rem,
-        opticalSize: 2.rem,
-      ),
+          color: accentColor,
+          size: isMobile
+              ? 20.sp
+              : isTablet
+                  ? 18.sp
+                  : 10.sp
+          // opticalSize: 2.rem,
+          ),
     );
   }
 
@@ -141,36 +192,45 @@ class MyApp extends StatelessWidget {
     var fontFamily = GoogleFonts.robotoCondensed().fontFamily;
     return base.copyWith(
       bodyMedium: base.bodyMedium!.copyWith(
-        fontSize: 0.9.rem,
+        fontSize: 12.sp,
         color: color,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
       bodyLarge: base.bodyLarge!.copyWith(
         color: color,
-        fontSize: 1.2.rem,
+        fontSize: 15.sp,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
       bodySmall: base.bodySmall!.copyWith(
         color: color,
-        fontSize: 0.6.rem,
+        fontSize: 09.sp,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
       titleSmall: base.titleSmall!.copyWith(
         color: color,
-        fontSize: 1.5.rem,
+        fontSize: 20.sp,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
       titleMedium: base.titleMedium!.copyWith(
         color: color,
-        fontSize: 1.8.rem,
+        fontSize: 24.sp,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
       titleLarge: base.titleLarge!.copyWith(
         color: color,
-        fontSize: 2.1.rem,
+        fontSize: 28.sp,
         letterSpacing: 5,
         fontFamily: fontFamily,
+        overflow: TextOverflow.ellipsis,
       ),
+      labelSmall: base.labelSmall!.copyWith(color: color, fontSize: 15.sp),
+      labelMedium: base.labelMedium!.copyWith(color: color, fontSize: 10.sp),
+      labelLarge: base.labelLarge!.copyWith(color: color, fontSize: 5.sp),
     );
   }
 }

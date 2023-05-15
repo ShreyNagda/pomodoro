@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:circle_list/circle_list.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:kplayer/kplayer.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pomodoro/model/timer_model.dart';
@@ -17,27 +18,13 @@ import '../main.dart';
 import '../utils/constants.dart';
 
 class HomePage extends StatefulWidget {
-  // static get route => CupertinoPageRoute(builder: (_) => const HomePage());
   const HomePage({super.key});
 
   @pragma("vm:entry-point")
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
     switch (receivedAction.buttonKeyPressed) {
-      case 'pause':
-        _HomePageState.timerController.pause();
-        break;
-      case 'resume':
-        _HomePageState.timerController.start();
-        break;
       case 'start':
         _HomePageState.timerController.start();
-        break;
-      case 'reset':
-        _HomePageState.timerController.reset();
-        break;
-      case 'close':
-        await service.deleteNotification(0);
         break;
     }
   }
@@ -46,24 +33,20 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class _HomePageState extends State<HomePage> {
   static late TimerController timerController;
 
   int count = 0;
 
   late TimerModel timerModel;
-  int selectedIndex = 0;
+
+  // int selectedIndex = 0;
   int maxvalue = 1;
   int selectedindex = 0;
-
-  int baseMultiplier = 15;
-  int spacerMultiplier = 2;
 
   late double width;
   late double height;
   late double spacer;
-
-  AppLifecycleState? state;
 
   late PlayerController player;
 
@@ -71,90 +54,124 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
     setTimer();
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      player = Player.asset('assets/audio/bell.mp3');
+    prefs.setBool(Constants.firstTimeOpen, false);
+    if (!kIsWeb && !isMobile) {
+      player = Player.asset(
+        "assets/audio/bell.mp3",
+        autoPlay: false,
+      );
     }
-    const MethodChannel("flutter.temp.channel").setMethodCallHandler(platformCallHandler);
     super.initState();
   }
 
-  Future<dynamic> platformCallHandler(MethodCall call) async {
-    if (call.method == "destroy"){
-      print("destroy");
-      dispose();
-    }
-  }
-  @mustCallSuper
   @override
   Future<void> dispose() async {
     timerController.dispose();
-    await service.deleteNotification(0);
+    // updateAppWidget();
+    if (!kIsWeb &&
+        (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
+      player.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      if (ResizeUtil().deviceType == DeviceType.Mobile) {
-        width = constraints.maxWidth / 3;
-        spacer = constraints.maxWidth / 50;
-      } else if (ResizeUtil().deviceType == DeviceType.Windows ||
-          ResizeUtil().deviceType == DeviceType.Linux) {
-        if (constraints.maxWidth > constraints.maxHeight) {
-          // print('height:${constraints.maxHeight}');
-          width = constraints.maxHeight / 4;
-          spacer = constraints.maxHeight / 100;
-        } else {
-          width = constraints.maxWidth / 4;
-          spacer = constraints.maxWidth / 100;
-        }
+      if (isMobile) {
+        width = 100.w;
+        spacer = 7.w;
+      } else if (isWindows) {
+        width = constraints.maxHeight > constraints.maxWidth
+            ? constraints.maxWidth / 5
+            : constraints.maxHeight / 5;
+        spacer = width / 20;
+      } else if (isTablet) {
+        width = constraints.maxHeight > constraints.maxWidth
+            ? constraints.maxWidth / 4
+            : constraints.maxHeight / 4;
+        spacer = width / 20;
+      } else if (isWeb) {
+        // print(constraints);
+        width = constraints.maxHeight > constraints.maxWidth
+            ? constraints.maxWidth / 4
+            : constraints.maxHeight / 4;
+        spacer = width / 20;
       }
-      return TimerControllerListener(
-          controller: timerController,
-          listener: (context, value) async {
-            // print('Listening..');
-            if (Platform.isAndroid) {
-              service.createNotification(timerModel, timerController);
-            }
-            if (state == AppLifecycleState.paused) {
-              service.deleteNotification(0);
-              // state = null;
-            }
-
-            if (value.status == TimerStatus.finished) {
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-                player.play();
-              } else {
-                await AssetsAudioPlayer.newPlayer().open(Audio('assets/audio/bell.mp3'), autoStart: true,loopMode: LoopMode.none);
-
+      return Center(
+        child: TimerControllerListener(
+            controller: timerController,
+            listener: (context, value) async {
+              if (value.status == TimerStatus.finished) {
+                if (kIsWeb) {
+                  await AssetsAudioPlayer.newPlayer().open(
+                    Audio('assets/audio/bell.mp3'),
+                    autoStart: true,
+                    loopMode: LoopMode.none,
+                  );
+                } else if (Platform.isWindows ||
+                    Platform.isLinux ||
+                    Platform.isMacOS) {
+                  player.play();
+                } else {
+                  await AssetsAudioPlayer.newPlayer().open(
+                    Audio('assets/audio/bell.mp3'),
+                    autoStart: true,
+                    loopMode: LoopMode.none,
+                  );
+                }
+                changeTimerAfterFinish();
+                if (prefs.getInt(Constants.pomodoroCompletedKey)! <
+                    prefs.getInt(Constants.dailyGoalKey)!) {
+                  if (prefs.getBool(Constants.autoStartBreakKey)! &&
+                      selectedindex != 0) {
+                    timerController.start();
+                  } else if (prefs.getBool(Constants.autoStartPomodoroKey)! &&
+                      selectedindex == 0) {
+                    timerController.start();
+                  } else {
+                    service.createNotification(timerModel, timerController);
+                  }
+                } else {
+                  if (isMobile) {
+                    service.notifications.createNotification(
+                      content: NotificationContent(
+                        id: 1,
+                        channelKey: 'pomodoro',
+                        title: 'Daily Goal achieved :) ',
+                      ),
+                    );
+                    if (prefs.getBool(Constants.autoStartBreakKey)! &&
+                        selectedindex != 0) {
+                      timerController.start();
+                    } else if (prefs.getBool(Constants.autoStartPomodoroKey)! &&
+                        selectedindex == 0) {
+                      timerController.start();
+                    }
+                  }
+                  // selectedindex = 0;
+                  // setTimer();
+                }
               }
-              changeTimerMode();
-              if (prefs.getBool(Constants.autoStartBreakKey)! &&
-                  selectedindex != 0) {
-                timerController.start();
-              }
-              if (prefs.getBool(Constants.autoStartPomodoroKey)! &&
-                  selectedindex == 0) {
-                timerController.start();
-              }
-            }
-          },
-          child: TimerControllerBuilder(
-              controller: timerController,
-              builder: (context, value, child) {
-                return Scaffold(
-                  appBar: AppBar(
-                    // backgroundColor: Colors.white,
-                    actions: [
-                      Visibility(
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        visible: value.status != TimerStatus.running &&
-                            value.status != TimerStatus.paused,
-                        child: IconButton(
+            },
+            child: TimerControllerBuilder(
+                controller: timerController,
+                builder: (context, value, child) {
+                  // print(width);
+                  return Scaffold(
+                    // backgroundColor: Colors.transparent,
+                    appBar: AppBar(
+                      // title: ,
+                      leading: const SizedBox.shrink(),
+                      actions: [
+                        Visibility(
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          visible: value.status != TimerStatus.running &&
+                              value.status != TimerStatus.paused,
+                          child: IconButton(
                             onPressed: () {
                               Navigator.push(context, SettingsPage.route)
                                   .then((value) {
@@ -164,160 +181,270 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 }
                               });
                             },
-                            icon: const Icon(Icons.list)),
-                      ),
-                    ],
-                  ),
-                  body: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircleList(
-                              rotateMode: RotateMode.stopRotate,
-                              initialAngle: (pi / 180) * 270,
-                              origin: const Offset(0, 0),
-                              outerRadius: width + spacer * 5,
-                              innerRadius: width + spacer * 2,
-                              children: List.generate(
-                                timerModel.minutes,
-                                (index) => Transform.rotate(
-                                  angle:
-                                      radians(360 / timerModel.minutes * index)
-                                          .toDouble(),
-                                  child: Container(
-                                    height: width / 12.5,
-                                    width: width / 25,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          (value.remaining / 60).ceil() > index
-                                              ? Colors.white
-                                              : Colors.white24,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: (width + spacer * 1.5) * 2,
-                              height: (width + spacer * 1.5) * 2,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.fromBorderSide(
-                                  BorderSide(
-                                    width: ResizeUtil().deviceType ==
-                                            DeviceType.Mobile
-                                        ? 0.7.mv
-                                        : 0.4.mv,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              child: Center(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (value.status == TimerStatus.running) {
-                                      timerController.pause();
-                                    } else {
-                                      timerController.start();
-                                    }
-                                  },
-                                  onLongPress: () {
-                                    timerController.reset();
-                                  },
-                                  child: CircularPercentIndicator(
-                                      backgroundWidth: width,
-                                      animation: true,
-                                      animateFromLastPercent: true,
-                                      animationDuration: 800,
-                                      radius: width,
-                                      lineWidth: width,
-                                      progressColor:
-                                          value.status == TimerStatus.paused
-                                              ? Colors.white24
-                                              : Colors.white,
-                                      percent:
-                                          value.status == TimerStatus.initial
-                                              ? 0
-                                              : value.remaining / maxvalue,
-                                      backgroundColor: Colors.transparent,
-                                      center: value.status ==
-                                              TimerStatus.running
-                                          ? const SizedBox.shrink()
-                                          : Center(
-                                              child: value.status ==
-                                                      TimerStatus.paused
-                                                  ? Icon(
-                                                      Icons.pause_rounded,
-                                                      size: 5.rem,
-                                                    )
-                                                  : IconButton(
-                                                      iconSize: 5.rem,
-                                                      onPressed: () {
-                                                        timerController.start();
-                                                      },
-                                                      icon: const Icon(
-                                                        Icons
-                                                            .play_arrow_rounded,
-                                                      ),
-                                                    ),
-                                            )),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(5),
-                          onTap: () {
-                            if (value.status != TimerStatus.running) {
-                              changeTimerMode();
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            // decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.unfold_more_rounded),
-                                Column(
-                                  children: [
-                                    Text(
-                                      timerModel.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!
-                                          .copyWith(fontSize: spacer * 3),
-                                    ),
-                                    Text(
-                                      formatString(value.remaining),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall!
-                                          .copyWith(fontSize: spacer * 4),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  width: 1.mv,
-                                )
-                              ],
-                            ),
+                            icon: const Icon(Icons.list),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              }));
+                    body: Center(
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          scrollbars: false,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CircleList(
+                                    rotateMode: RotateMode.stopRotate,
+                                    initialAngle: (pi / 180) * 270,
+                                    origin: const Offset(0, 0),
+                                    // outerCircleColor: Colors.black,
+                                    outerRadius: (width + spacer * 5),
+                                    innerRadius: (width + spacer * 2),
+                                    children: List.generate(
+                                      timerModel.minutes,
+                                      (index) => Transform.rotate(
+                                        angle: radians(360 /
+                                                timerModel.minutes *
+                                                index)
+                                            .toDouble(),
+                                        child: Container(
+                                          height: 1.5.mv,
+                                          width: 0.5.mv,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                (value.remaining / 60).ceil() >
+                                                        index
+                                                    ? Colors.white
+                                                    : Colors.white24,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: (width + spacer) * 2,
+                                    height: (width + spacer) * 2,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.fromBorderSide(
+                                        BorderSide(
+                                          width: ResizeUtil().deviceType ==
+                                                  DeviceType.Mobile
+                                              ? 4.w
+                                              : 5,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        if (value.status ==
+                                            TimerStatus.running) {
+                                          timerController.pause();
+                                        } else {
+                                          timerController.start();
+                                        }
+                                        service.deleteNotification(0);
+                                      },
+                                      onLongPress: () {
+                                        timerController.reset();
+                                        service.createNotification(
+                                            timerModel, timerController);
+                                      },
+                                      child: CircularPercentIndicator(
+                                        backgroundWidth: -1,
+                                        // arcBackgroundColor: ,
+                                        animation: true,
+                                        animateFromLastPercent: true,
+                                        animationDuration: 800,
+                                        radius: width - spacer,
+                                        lineWidth: width - spacer,
+                                        progressColor:
+                                            value.status == TimerStatus.paused
+                                                ? Colors.white24
+                                                : Colors.white,
+                                        percent:
+                                            value.status == TimerStatus.initial
+                                                ? 0
+                                                : value.remaining / maxvalue,
+                                        backgroundColor: Colors.transparent,
+                                        center: value.status ==
+                                                TimerStatus.running
+                                            ? const SizedBox()
+                                            : value.status == TimerStatus.paused
+                                                ? const Icon(
+                                                    Icons.pause_rounded,
+                                                  )
+                                                : IconButton(
+                                                    iconSize: 2.rem,
+                                                    onPressed: () {
+                                                      timerController.start();
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.play_arrow_rounded,
+                                                    ),
+                                                  ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Wrap(
+                                // mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ...List.generate(
+                                    prefs.getInt(Constants.dailyGoalKey) ?? 4,
+                                    (index) => Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        // padding: const EdgeInsets.all(10),
+                                        width: isMobile ? 4.sp : 2.sp,
+                                        height: isMobile ? 4.sp : 2.sp,
+                                        margin: EdgeInsets.fromLTRB(
+                                            index % 4 == 0 ? 2.mv : 0, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: (index + 1) >
+                                                  (prefs.getInt(Constants
+                                                          .pomodoroCompletedKey) ??
+                                                      -1)
+                                              ? Colors.white12
+                                              : Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  prefs.getInt(
+                                              Constants.pomodoroCompletedKey)! >
+                                          prefs.getInt(Constants.dailyGoalKey)!
+                                      ? Text(
+                                          '+${prefs.getInt(Constants.pomodoroCompletedKey)! - prefs.getInt(Constants.dailyGoalKey)!}',
+                                          textScaleFactor: 0.7,
+                                          style: isMobile
+                                              ? Theme.of(context)
+                                                  .textTheme
+                                                  .labelSmall!.copyWith()
+                                              : isTablet
+                                                  ? Theme.of(context)
+                                                      .textTheme
+                                                      .labelMedium
+                                                  : Theme.of(context)
+                                                      .textTheme
+                                                      .labelLarge,
+                                        )
+                                      : const SizedBox.shrink()
+                                ],
+                              ),
+                              InkWell(
+                                borderRadius: BorderRadius.circular(5),
+                                onTap: () {
+                                  if (value.status != TimerStatus.running) {
+                                    changeTimerMode();
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  // decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.unfold_more_rounded),
+                                      Column(
+                                        children: [
+                                          Text(
+                                            timerModel.name,
+                                            style: isMobile
+                                                ? Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall
+                                                : isTablet
+                                                    ? Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall
+                                                    : Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall,
+                                          ),
+                                          Text(
+                                            formatString(value.remaining),
+                                            style: isMobile
+                                                ? Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                : isTablet
+                                                    ? Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                    : Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium,
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                })),
+      );
     });
   }
 
+  void changeTimerAfterFinish() {
+    int pomodorosCompleted = prefs.getInt(Constants.pomodoroCompletedKey) ?? 0;
+
+    switch (selectedindex) {
+      case 0:
+        pomodorosCompleted++;
+        prefs.setInt(Constants.pomodoroCompletedKey, pomodorosCompleted);
+        if (pomodorosCompleted != 0 &&
+            (pomodorosCompleted % prefs.getInt(Constants.numberOfBreaksKey)! ==
+                0)) {
+          print('long break');
+          selectedindex = 2;
+        } else {
+          print('short break');
+          selectedindex = 1;
+        }
+        // if (pomodorosCompleted >= prefs.getInt(Constants.dailyGoalKey)!) {
+        //   prefs.setInt(Constants.pomodoroCompletedKey, 0);
+        // }
+        break;
+      case 1:
+        selectedindex = 0;
+        break;
+      case 2:
+        selectedindex = 0;
+        break;
+    }
+    setTimer();
+  }
+
   void changeTimerMode() {
+    // prefs.setInt(Constants.pomodoroCompletedKey,
+    //     prefs.getInt(Constants.pomodoroCompletedKey)! + 1);
+    // if(selectedIndex == 0){
+    //   if(prefs.getInt(Constants.pomodoroCompletedKey)! % 4 == 0){
+    //     selectedIndex = 2;
+    //   }else{
+    //     selectedIndex = 1;
+    //   }
+    // }else{
+    // }
     switch (selectedindex) {
       case 0:
         selectedindex = prefs.getInt(Constants.breakKey)!;
@@ -330,11 +457,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         selectedindex = 0;
         break;
     }
-
     setTimer();
   }
 
-  setBreakKey() {
+  void setBreakKey() {
     if (prefs.getInt(Constants.breakKey) == 1) {
       prefs.setInt(Constants.breakKey, 2);
     } else if (prefs.getInt(Constants.breakKey) == 2) {

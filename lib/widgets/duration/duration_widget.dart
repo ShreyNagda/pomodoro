@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../model/timer_model.dart';
 import '../../main.dart';
+import '../../model/timer_model.dart';
 import 'duration_dialog.dart';
 
-class DurationWidget extends StatefulWidget { 
+class DurationWidget extends StatefulWidget {
   final int index;
   final double width;
-  const DurationWidget({super.key, required this.index, required this.width});
+
+  const DurationWidget({
+    super.key,
+    required this.index,
+    required this.width,
+  });
 
   @override
   State<DurationWidget> createState() => _DurationWidgetState();
@@ -15,6 +20,7 @@ class DurationWidget extends StatefulWidget {
 
 class _DurationWidgetState extends State<DurationWidget> {
   late TimerModel timerModel;
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +35,10 @@ class _DurationWidgetState extends State<DurationWidget> {
         showDialog(
             context: context,
             builder: (_) {
-              return DurationDialog(index: widget.index, width: widget.width,);
+              return DurationDialog(
+                index: widget.index,
+                width: widget.width,
+              );
             }).then(
           (value) {
             // print(timers);
@@ -38,21 +47,29 @@ class _DurationWidgetState extends State<DurationWidget> {
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
+        width: isMobile ? widget.width / 5 : widget.width / 4,
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.black12
-        ),
+            borderRadius: BorderRadius.circular(!isMobile ? 15 : 10),
+            color: Colors.black12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               '${timerModel.minutes}',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: isMobile
+                  ? Theme.of(context).textTheme.bodyLarge
+                  : isTablet
+                      ? Theme.of(context).textTheme.titleSmall
+                      : Theme.of(context).textTheme.bodyMedium,
             ),
             Text(
               timerModel.name,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: isMobile
+                  ? Theme.of(context).textTheme.bodyMedium
+                  : isTablet
+                      ? Theme.of(context).textTheme.bodySmall
+                      : Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             )
           ],

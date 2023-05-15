@@ -36,10 +36,7 @@ class NotificationService {
     TimerModel timerModel,
     TimerController timerController,
   ) {
-    String status = (timerController.value.status == TimerStatus.initial ||
-            timerController.value.status == TimerStatus.initial)
-        ? 'ready for new session'
-        : timerController.value.status.name;
+    String status = 'Start new session';
 
     notifications.createNotification(
       content: NotificationContent(
@@ -49,64 +46,13 @@ class NotificationService {
         channelKey: 'pomodoro',
         title: '${timerModel.name} - $status',
         body: formatString(timerController.value.remaining),
-        progress:
-            ((timerController.value.remaining / (timerModel.minutes * 60)) *
-                    100)
-                .round(),
-        notificationLayout: NotificationLayout.ProgressBar,
+        // notificationLayout: NotificationLayout.ProgressBar,
         color: Colors.primaries.first.shade300,
-        autoDismissible: false,
+        autoDismissible: true,
       ),
-      actionButtons: timerController.value.status == TimerStatus.initial
-          ? [
-              NotificationActionButton(
-                key: 'start',
-                label: 'Start',
-                showInCompactView: false,
-                autoDismissible: false,
-                actionType: ActionType.SilentAction,
-              ),
-              NotificationActionButton(
-                key: 'close',
-                label: 'close',
-                showInCompactView: false,
-                autoDismissible: false,
-                actionType: ActionType.SilentAction,
-              ),
-            ]
-          : timerController.value.status == TimerStatus.running
-              ? [
-                  NotificationActionButton(
-                    key: 'pause',
-                    label: 'Pause',
-                    showInCompactView: false,
-                    autoDismissible: false,
-                    actionType: ActionType.SilentAction,
-                  ),
-                ]
-              : [
-                  NotificationActionButton(
-                    key: 'resume',
-                    label: 'Resume',
-                    showInCompactView: true,
-                    autoDismissible: false,
-                    actionType: ActionType.SilentAction,
-                  ),
-                  NotificationActionButton(
-                    key: 'reset',
-                    label: 'Reset',
-                    showInCompactView: true,
-                    autoDismissible: false,
-                    actionType: ActionType.SilentAction,
-                  ),
-                  NotificationActionButton(
-                    key: 'close',
-                    label: 'Close',
-                    showInCompactView: true,
-                    autoDismissible: false,
-                    actionType: ActionType.SilentAction,
-                  ),
-                ],
+      actionButtons: [
+        NotificationActionButton(key: 'start', label: 'Start',)
+      ]
     );
   }
 

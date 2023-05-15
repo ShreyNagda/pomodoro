@@ -1,5 +1,6 @@
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:resize/resize.dart';
 
 import '../main.dart';
 
@@ -45,54 +46,70 @@ class _RadioButtonState extends State<RadioButton> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
+                width: isMobile ? 3.rem : 5.mv,
+                height: isMobile ? 3.rem : 5.mv,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: !prefsKeyValue ? Colors.white : Colors.white10,
                 ),
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      prefsKeyValue = false;
-                      prefs.setBool(widget.prefsKey, prefsKeyValue);
-                    });
-                    widget.onChanged();
-                    // print(prefs.getBool(Constants.autoStartBreakKey));
-                  },
-                  icon: Icon(
-                    Icons.close,
-                    color: !prefsKeyValue
-                        ? DynamicColorTheme.of(context).color
-                        : Colors.white,
+                child: Center(
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        prefsKeyValue = false;
+                        prefs.setBool(widget.prefsKey, prefsKeyValue);
+                      });
+                      widget.onChanged();
+                    },
+                    icon: Icon(
+                      Icons.close,
+                      color: !prefsKeyValue
+                          ? DynamicColorTheme.of(context).color
+                          : Colors.white,
+                      size: isMobile ? 2.rem : 2.mv,
+                    ),
                   ),
                 ),
               ),
               Container(
+                width: isMobile ? 3.rem : 5.mv,
+                height: isMobile ? 3.rem : 5.mv,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: prefsKeyValue ? Colors.white : Colors.white10,
                 ),
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      prefsKeyValue = true;
-                      prefs.setBool(widget.prefsKey, prefsKeyValue);
-                    });
-                    // print(prefs.getBool(Constants.autoStartBreakKey));
-                    widget.onChanged();
-                  },
-                  icon: Icon(
-                    Icons.check,
-                    color: prefsKeyValue
-                        ? DynamicColorTheme.of(context).color
-                        : Colors.white,
+                child: Center(
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        prefsKeyValue = true;
+                        prefs.setBool(widget.prefsKey, prefsKeyValue);
+                      });
+                      // print(prefs.getBool(Constants.autoStartBreakKey));
+                      widget.onChanged();
+                    },
+                    icon: Icon(
+                      Icons.check,
+                      color: prefsKeyValue
+                          ? DynamicColorTheme.of(context).color
+                          : Colors.white,
+                      size: isMobile ? 2.rem : 2.mv,
+                    ),
                   ),
                 ),
               )
             ],
           ),
+          const SizedBox(
+            height: 10,
+          ),
           Text(
             widget.label,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: isMobile
+                ? Theme.of(context).textTheme.bodyMedium
+                : isTablet
+                    ? Theme.of(context).textTheme.bodySmall
+                    : Theme.of(context).textTheme.bodyMedium,
           ),
         ],
       ),
