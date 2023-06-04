@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cron/cron.dart';
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
+import 'package:easy_splash_screen/easy_splash_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,8 +39,8 @@ Future<void> main() async {
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
+    // DeviceOrientation.landscapeLeft,
+    // DeviceOrientation.landscapeRight,
   ]);
   if (kIsWeb) {
   } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -134,7 +135,6 @@ class MyApp extends StatelessWidget {
         isTablet = ResizeUtil().deviceType == DeviceType.Tablet;
         isWindows = ResizeUtil().deviceType == DeviceType.Windows;
         isWeb = ResizeUtil().deviceType == DeviceType.Web;
-        print(isTablet);
         return DynamicColorTheme(
           data: (Color color, bool isDark) {
             return buildTheme(color, isDark);
@@ -146,9 +146,14 @@ class MyApp extends StatelessWidget {
               spacer = width / 10;
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                home: prefs.getBool(Constants.firstTimeOpen)!
-                    ? const OnBoardingScreen()
-                    : const HomePage(),
+                home: EasySplashScreen(
+                  logo: Image.asset('assets/images/logo.png', width: isMobile ? 80.w : isTablet ? 40.w : 20.w,),
+                  navigator: prefs.getBool(Constants.firstTimeOpen)!
+                      ? const OnBoardingScreen()
+                      : const HomePage(),
+                  durationInSeconds: 2,
+                  loaderColor: Constants.colors.first,
+                ),
                 theme: data,
                 routes: {
                   "/home": (context) => const HomePage(),

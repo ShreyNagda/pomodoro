@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                                 }
                               });
                             },
-                            icon: const Icon(Icons.list),
+                            icon: Icon(Icons.list, size: isWindows ? width / 5 : width / 3),
                           ),
                         ),
                       ],

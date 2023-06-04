@@ -50,9 +50,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   });
                 },
                 itemBuilder: (context, index) => onBoardingContent(
-                    image: data[index].image,
-                    title: data[index].title,
-                    description: data[index].description),
+                  image: data[index].image,
+                  title: data[index].title,
+                  description: data[index].description,
+                ),
               ),
             ),
             Row(

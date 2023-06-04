@@ -46,8 +46,8 @@ class _RadioButtonState extends State<RadioButton> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                width: isMobile ? 3.rem : 5.mv,
-                height: isMobile ? 3.rem : 5.mv,
+                width: isMobile ? 3.rem : 6.mv,
+                height: isMobile ? 3.rem : 6.mv,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: !prefsKeyValue ? Colors.white : Colors.white10,
@@ -72,8 +72,8 @@ class _RadioButtonState extends State<RadioButton> {
                 ),
               ),
               Container(
-                width: isMobile ? 3.rem : 5.mv,
-                height: isMobile ? 3.rem : 5.mv,
+                width: isMobile ? 3.rem : 6.mv,
+                height: isMobile ? 3.rem : 6.mv,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: prefsKeyValue ? Colors.white : Colors.white10,
@@ -93,7 +93,7 @@ class _RadioButtonState extends State<RadioButton> {
                       color: prefsKeyValue
                           ? DynamicColorTheme.of(context).color
                           : Colors.white,
-                      size: isMobile ? 2.rem : 2.mv,
+                      size: isMobile ? 2.rem : 3.mv,
                     ),
                   ),
                 ),
