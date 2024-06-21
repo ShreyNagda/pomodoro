@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/main.dart';
 import 'package:pomodoro/pages/homepage.dart';
@@ -91,8 +92,9 @@ class _OnBoardingState extends State<OnBoarding> {
                                 curve: Curves.ease);
                           } else {
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => const HomePage()),
+                              CupertinoPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
                             );
                             await prefs.setBool("onboarding", false);
                           }

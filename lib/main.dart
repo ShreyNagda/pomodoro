@@ -40,8 +40,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pomodoro | Shrey Nagda',
       theme: Theme.lightThemeData,
-      home:
-          prefs.getBool("onboarding")! ? const OnBoarding() : const HomePage(),
+      home: prefs.getBool("onboarding")! && !kIsWeb
+          ? const OnBoarding()
+          : const HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }

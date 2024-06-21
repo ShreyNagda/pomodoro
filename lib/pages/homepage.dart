@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/main.dart';
@@ -68,7 +69,7 @@ class _HomePageState extends State<HomePage> {
     double divisor = isPhone
         ? 3
         : minDimension > 500
-            ? 10
+            ? 8
             : 5;
     double radius = minDimension / divisor;
     return _controller == null
@@ -101,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           onPressed: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(
+                              CupertinoPageRoute(
                                 builder: (context) => const SettingsPage(),
                               ),
                             );
@@ -121,8 +122,8 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                width: radius * 2.5,
-                                height: radius * 2.5,
+                                width: radius * 2.3,
+                                height: radius * 2.3,
                                 decoration: BoxDecoration(
                                   borderRadius:
                                       BorderRadius.circular(radius * 2),
