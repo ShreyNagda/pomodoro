@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -23,9 +25,34 @@ class _SettingsPageState extends State<SettingsPage> {
           },
         ),
       ),
-      body: const SafeArea(
-        child: Column(
-          children: [],
+      body: SafeArea(
+        child: Center(
+          child: SizedBox(
+            // color: Colors.amber,
+            width: min(400, MediaQuery.of(context).size.width),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  const Spacer(),
+                  InkWell(
+                    onTap: () {},
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      child: const Text(
+                        "How to Use?",
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

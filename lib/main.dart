@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro/pages/homepage.dart';
-import 'package:pomodoro/pages/onboarding.dart';
+import 'package:pomodoro/pages/settings.dart';
 import 'package:pomodoro/utils/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,8 +40,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pomodoro | Shrey Nagda',
       theme: Theme.lightThemeData,
-      home: prefs.getBool("onboarding")! && !kIsWeb
-          ? const OnBoarding()
+      home: prefs.getBool("onboarding")!
+          ? const SettingsPage()
           : const HomePage(),
       debugShowCheckedModeBanner: false,
     );
