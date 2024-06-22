@@ -31,16 +31,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    getPomodoros();
     setCurrentPomodoro();
     super.initState();
   }
 
   void setCurrentPomodoro() {
-    var tempStringPomodoro = stringPomodoros[index];
-    currentPomodoro = Pomodoro.fromJson(tempStringPomodoro);
+    currentPomodoro = pomodoros[index];
     totalPeriod = currentPomodoro.period * 60;
-    _controller = TimerController.seconds(
-        totalPeriod); // total period is in minutes but we want it in seconds..
+    _controller = TimerController.seconds(totalPeriod);
   }
 
   void changePomodoro() {
@@ -89,6 +88,11 @@ class _HomePageState extends State<HomePage> {
                 } else {
                   await webPlayer.play(AssetSource('audio/bell.mp3'));
                 }
+                if (index == 0) {
+                  prefs.setInt(
+                      "dailycomplete", prefs.getInt("dailycomplete")! + 1);
+                }
+                print(prefs.getInt("dailycomplete"));
                 changePomodoro();
               }
             },
@@ -177,9 +181,31 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                height: isPhone ? 15 : 5,
+                              const SizedBox(
+                                height: 20,
                               ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ...List.generate(prefs.getInt("dailygoal")!,
+                                      (index) {
+                                    return Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 5),
+                                      width: 10,
+                                      height: 10,
+                                      decoration: BoxDecoration(
+                                        color: index <
+                                                prefs.getInt("dailycomplete")!
+                                            ? Colors.white
+                                            : Colors.white12,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               Text(
                                 "${(value.remaining ~/ 60).toString().padLeft(2, "0")} : ${(value.remaining % 60).toString().padLeft(2, "0")}",
                                 style: TextStyle(

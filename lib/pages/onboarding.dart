@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pomodoro/main.dart';
 import 'package:pomodoro/pages/homepage.dart';
 import 'package:pomodoro/utils/onboard.dart';
@@ -42,13 +45,72 @@ class _OnBoardingState extends State<OnBoarding> {
                   Expanded(
                     child: PageView.builder(
                       controller: pageController,
-                      itemCount: data.length,
+                      itemCount: data.length + 2,
                       onPageChanged: (value) {
                         setState(() {
                           pageIndex = value;
                         });
                       },
                       itemBuilder: (context, index) {
+                        if (index >= data.length) {
+                          double minDimension = min(height, width);
+                          double divisor = isPhone
+                              ? 3
+                              : minDimension > 500
+                                  ? 8
+                                  : 5;
+                          double radius = minDimension / divisor;
+                          return SizedBox(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Center(
+                                    child: Container(
+                                      height: radius * 2.3,
+                                      width: radius * 2.3,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(radius * 2),
+                                        border: Border.fromBorderSide(
+                                          BorderSide(
+                                              color: Colors.white,
+                                              width: radius / 20),
+                                        ),
+                                      ),
+                                      child: CircularPercentIndicator(
+                                        radius: radius,
+                                        lineWidth: radius,
+                                        progressColor: Colors.white,
+                                        backgroundColor: Colors.transparent,
+                                        percent: index == data.length ? 0 : 1,
+                                        center: index == data.length
+                                            ? IconButton(
+                                                icon: Icon(
+                                                  Icons.play_arrow_rounded,
+                                                  size: radius,
+                                                ),
+                                                onPressed: () {},
+                                              )
+                                            : null,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Visibility(
+                                    visible: index == data.length,
+                                    child: const Text(
+                                        "Tap play to start or resume"),
+                                  ),
+                                  Visibility(
+                                      visible: index == data.length + 1,
+                                      child: const Text(
+                                          "Tap center to pause and long press to restart"))
+                                ],
+                              ),
+                            ),
+                          );
+                        }
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -86,20 +148,24 @@ class _OnBoardingState extends State<OnBoarding> {
                       const Spacer(),
                       OnBoardingButton(
                         onTap: () async {
-                          if (pageIndex < data.length - 1) {
+                          if (pageIndex < data.length + 1) {
                             pageController.nextPage(
                                 duration: animationDuration,
                                 curve: Curves.ease);
                           } else {
-                            Navigator.of(context).pushReplacement(
-                              CupertinoPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                            );
-                            await prefs.setBool("onboarding", false);
+                            if (prefs.getBool("onboarding")! == true) {
+                              Navigator.of(context).pushReplacement(
+                                CupertinoPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                              );
+                              await prefs.setBool("onboarding", false);
+                            } else {
+                              Navigator.of(context).pop();
+                            }
                           }
                         },
-                        child: pageIndex < data.length - 1
+                        child: pageIndex < data.length + 1
                             ? const Icon(Icons.arrow_forward_ios_rounded)
                             : const Text("Start!",
                                 style: TextStyle(fontSize: 20)),

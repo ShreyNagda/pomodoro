@@ -1,6 +1,12 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pomodoro/main.dart';
+import 'package:pomodoro/pages/onboarding.dart';
+import 'package:pomodoro/utils/pomodoro.dart';
+import 'package:pomodoro/widgets/iconbutton.dart';
+import 'package:pomodoro/widgets/settings_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,6 +16,24 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  late List<Pomodoro> pomodoros;
+  late int dailyGoal;
+  @override
+  void initState() {
+    getPomodoros();
+    dailyGoal = prefs.getInt("dailygoal")!;
+    super.initState();
+  }
+
+  void getPomodoros() {
+    setState(() {
+      pomodoros = prefs
+          .getStringList("pomodoros")!
+          .map((p) => Pomodoro.fromJson(p))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,14 +58,105 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
+                  Row(children: [
+                    ...pomodoros.map(
+                      (p) => Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            showSettingDialog(p);
+                          },
+                          child: Card(
+                            // color: Colors.white38,
+                            child: Container(
+                              height: 100,
+                              padding: const EdgeInsets.all(10),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      p.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    Text(
+                                      '${p.period}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displayMedium,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ]),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Daily Pomdoro Goal",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomIconButton(
+                                callback: () {
+                                  setState(() {
+                                    if (dailyGoal > 1) dailyGoal--;
+                                  });
+                                },
+                                iconData: Icons.remove_rounded,
+                                isDisabled: dailyGoal <= 1,
+                                iconSize: 20),
+                            Card(
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: Center(
+                                  child: Text(
+                                    '$dailyGoal',
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            CustomIconButton(
+                                callback: () {
+                                  setState(() => dailyGoal++);
+                                },
+                                iconData: Icons.add_rounded,
+                                isDisabled: dailyGoal <= 1,
+                                iconSize: 20)
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   const Spacer(),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(CupertinoPageRoute(
+                          builder: (context) => const OnBoarding()));
+                    },
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       child: const Text(
                         "How to Use?",
@@ -56,5 +171,15 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  void showSettingDialog(Pomodoro pomodoro) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return SettingsDialog(pomodoro: pomodoro);
+        }).then((_) async {
+      getPomodoros();
+    });
   }
 }
