@@ -1,16 +1,4 @@
-# pomodoro
+# Pomodoro
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## A productivity timer based on Italian pomdoro technique.
+Pomodoro technique is a time blocking technique in which you work for 25 minutes and then takes a break for a short time. In this way you can achieve more work in the same amount of time with some break in between. In this way, you can stay productive and complete more work.
