@@ -26,6 +26,8 @@ class _HomePageState extends State<HomePage> {
   late Pomodoro currentPomodoro;
   late int totalPeriod;
 
+  late int dailyGoal;
+
   final AudioPlayer webPlayer = AudioPlayer();
   final AssetsAudioPlayer player = AssetsAudioPlayer.newPlayer();
 
@@ -33,7 +35,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     getPomodoros();
     setCurrentPomodoro();
+    dailyGoal = prefs.getInt("dailygoal")!;
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomePage oldWidget) {
+    dailyGoal = prefs.getInt("dailygoal")!;
+    super.didUpdateWidget(oldWidget);
   }
 
   void setCurrentPomodoro() {
@@ -92,7 +101,6 @@ class _HomePageState extends State<HomePage> {
                   prefs.setInt(
                       "dailycomplete", prefs.getInt("dailycomplete")! + 1);
                 }
-                print(prefs.getInt("dailycomplete"));
                 changePomodoro();
               }
             },
@@ -105,11 +113,17 @@ class _HomePageState extends State<HomePage> {
                       actions: [
                         IconButton(
                           onPressed: () {
-                            Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (context) => const SettingsPage(),
-                              ),
-                            );
+                            Navigator.of(context)
+                                .push(
+                                  CupertinoPageRoute(
+                                    builder: (context) => const SettingsPage(),
+                                  ),
+                                )
+                                .then((_) => {
+                                      setState(() {
+                                        dailyGoal = prefs.getInt("dailygoal")!;
+                                      })
+                                    });
                           },
                           icon: Icon(
                             Icons.settings_rounded,
@@ -184,26 +198,29 @@ class _HomePageState extends State<HomePage> {
                               const SizedBox(
                                 height: 20,
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ...List.generate(prefs.getInt("dailygoal")!,
-                                      (index) {
-                                    return Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 5),
-                                      width: 10,
-                                      height: 10,
-                                      decoration: BoxDecoration(
-                                        color: index <
-                                                prefs.getInt("dailycomplete")!
-                                            ? Colors.white
-                                            : Colors.white12,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    );
-                                  }),
-                                ],
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  // mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ...List.generate(dailyGoal, (index) {
+                                      return Container(
+                                        margin: const EdgeInsets.all(5),
+                                        width: 10,
+                                        height: 10,
+                                        decoration: BoxDecoration(
+                                          color: index <
+                                                  prefs.getInt("dailycomplete")!
+                                              ? Colors.white
+                                              : Colors.white12,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 10),
                               Text(

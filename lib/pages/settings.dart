@@ -58,85 +58,92 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
-                  Row(children: [
-                    ...pomodoros.map(
-                      (p) => Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            showSettingDialog(p);
-                          },
-                          child: Card(
-                            // color: Colors.white38,
-                            child: Container(
-                              height: 100,
-                              padding: const EdgeInsets.all(10),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      p.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                    ),
-                                    Text(
-                                      '${p.period}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .displayMedium,
-                                    )
-                                  ],
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ...pomodoros.map(
+                          (p) => InkWell(
+                            onTap: () {
+                              showSettingDialog(p);
+                            },
+                            child: Card(
+                              // color: Colors.white38,
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                padding: const EdgeInsets.all(10),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        p.name,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      Text(
+                                        '${p.period}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .displaySmall,
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    )
-                  ]),
+                        )
+                      ]),
                   const SizedBox(
-                    height: 20,
+                    height: 30,
                   ),
                   Expanded(
                     child: Column(
                       children: [
                         Text(
                           "Daily Pomdoro Goal",
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CustomIconButton(
-                                callback: () {
-                                  setState(() {
-                                    if (dailyGoal > 1) dailyGoal--;
-                                  });
-                                },
-                                iconData: Icons.remove_rounded,
-                                isDisabled: dailyGoal <= 1,
-                                iconSize: 20),
-                            Card(
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
+                              callback: () async {
+                                setState(() {
+                                  if (dailyGoal > 1) dailyGoal--;
+                                });
+                                await prefs.setInt("dailygoal", dailyGoal);
+                              },
+                              iconData: Icons.remove_rounded,
+                              isDisabled: dailyGoal <= 1,
+                              iconSize: 40,
+                            ),
+                            Container(
+                              width: 100,
+                              height: 100,
+                              padding: const EdgeInsets.all(10),
+                              child: Card(
                                 child: Center(
                                   child: Text(
                                     '$dailyGoal',
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall,
                                   ),
                                 ),
                               ),
                             ),
                             CustomIconButton(
-                                callback: () {
-                                  setState(() => dailyGoal++);
-                                },
-                                iconData: Icons.add_rounded,
-                                isDisabled: dailyGoal <= 1,
-                                iconSize: 20)
+                              callback: () async {
+                                setState(() => dailyGoal++);
+                                await prefs.setInt("dailygoal", dailyGoal);
+                              },
+                              iconData: Icons.add_rounded,
+                              isDisabled: dailyGoal <= 1,
+                              iconSize: 40,
+                            )
                           ],
                         ),
                       ],
@@ -158,9 +165,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(5),
                       ),
-                      child: const Text(
+                      child: Text(
                         "How to Use?",
                         textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
                   )

@@ -99,13 +99,23 @@ class _OnBoardingState extends State<OnBoarding> {
                                   const SizedBox(height: 10),
                                   Visibility(
                                     visible: index == data.length,
-                                    child: const Text(
-                                        "Tap play to start or resume"),
+                                    child: Text(
+                                      "Tap play to start or resume",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
                                   ),
                                   Visibility(
-                                      visible: index == data.length + 1,
-                                      child: const Text(
-                                          "Tap center to pause and long press to restart"))
+                                    visible: index == data.length + 1,
+                                    child: Text(
+                                      "Tap center to pause and long press to restart",
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
+                                  )
                                 ],
                               ),
                             ),
@@ -120,7 +130,7 @@ class _OnBoardingState extends State<OnBoarding> {
                             ),
                             Text(
                               data[index].title,
-                              style: const TextStyle(fontSize: 24),
+                              style: Theme.of(context).textTheme.headlineMedium,
                               textAlign: TextAlign.center,
                             ),
                             // const SizedBox(height: 20),
@@ -128,6 +138,7 @@ class _OnBoardingState extends State<OnBoarding> {
                               data[index].desc,
                               overflow: TextOverflow.visible,
                               textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium,
                             )
                           ],
                         );
