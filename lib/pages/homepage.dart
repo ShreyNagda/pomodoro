@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -29,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   late int dailyGoal;
 
   final AudioPlayer webPlayer = AudioPlayer();
-  final AssetsAudioPlayer player = AssetsAudioPlayer.newPlayer();
 
   @override
   void initState() {
