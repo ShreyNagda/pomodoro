@@ -36,6 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = min(MediaQuery.of(context).size.width / 4, 100);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -66,12 +67,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             onTap: () {
                               showSettingDialog(p);
                             },
-                            child: Card(
-                              // color: Colors.white38,
-                              child: Container(
-                                height: 100,
-                                width: 100,
-                                padding: const EdgeInsets.all(10),
+                            child: Container(
+                              height: width,
+                              width: width,
+                              padding: const EdgeInsets.all(10),
+                              child: Card(
                                 child: Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -120,11 +120,11 @@ class _SettingsPageState extends State<SettingsPage> {
                               isDisabled: dailyGoal <= 1,
                               iconSize: 40,
                             ),
-                            Container(
-                              width: 100,
-                              height: 100,
-                              padding: const EdgeInsets.all(10),
-                              child: Card(
+                            Card(
+                              child: Container(
+                                width: width,
+                                height: width,
+                                padding: const EdgeInsets.all(10),
                                 child: Center(
                                   child: Text(
                                     '$dailyGoal',

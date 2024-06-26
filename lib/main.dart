@@ -33,8 +33,6 @@ Future<void> main() async {
       (prefs.getInt("refreshtime")! == 7 && DateTime.now().weekday == 1)) {
     prefs.setInt("dailycomplete", 0);
     prefs.setInt("refreshtime", DateTime.now().weekday);
-    print(prefs.getInt("dailycomplete"));
-    print(prefs.getInt("refreshtime"));
   }
   await getPomodoros();
   runApp(const MyApp());

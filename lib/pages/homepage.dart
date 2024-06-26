@@ -5,11 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pomodoro/main.dart';
+import 'package:pomodoro/pages/custom_indicator.dart';
 import 'package:pomodoro/pages/settings.dart';
 import 'package:pomodoro/utils/globals.dart';
 import 'package:pomodoro/utils/pomodoro.dart';
 import 'package:timer_controller/timer_controller.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,12 +35,6 @@ class _HomePageState extends State<HomePage> {
     setCurrentPomodoro();
     dailyGoal = prefs.getInt("dailygoal")!;
     super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant HomePage oldWidget) {
-    dailyGoal = prefs.getInt("dailygoal")!;
-    super.didUpdateWidget(oldWidget);
   }
 
   void setCurrentPomodoro() {
@@ -74,9 +68,9 @@ class _HomePageState extends State<HomePage> {
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
     double divisor = isPhone
         ? 3
-        : minDimension > 500
+        : minDimension > 450
             ? 8
-            : 5;
+            : 6;
     double radius = minDimension / divisor;
     return _controller == null
         ? const Scaffold(
@@ -137,61 +131,11 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                width: radius * 2.3,
-                                height: radius * 2.3,
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(radius * 2),
-                                  border: Border.fromBorderSide(
-                                    BorderSide(
-                                      color: text,
-                                      width: radius / 20,
-                                    ),
-                                  ),
-                                ),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (value.status == TimerStatus.initial ||
-                                        value.status == TimerStatus.paused) {
-                                      _controller!.start();
-                                    } else if (value.status ==
-                                        TimerStatus.running) {
-                                      _controller!.pause();
-                                    } else {
-                                      _controller!.start();
-                                    }
-                                  },
-                                  onLongPress: () {
-                                    if (value.status == TimerStatus.paused ||
-                                        value.status == TimerStatus.finished) {
-                                      _controller!.reset();
-                                    }
-                                  },
-                                  child: CircularPercentIndicator(
-                                    percent: value.status == TimerStatus.initial
-                                        ? totalPeriod / totalPeriod
-                                        : value.remaining / totalPeriod,
-                                    radius: radius,
-                                    lineWidth: radius,
-                                    progressColor: value.status ==
-                                            TimerStatus.initial
-                                        ? Colors.transparent
-                                        : value.status == TimerStatus.running
-                                            ? text
-                                            : text.withAlpha(150),
-                                    backgroundColor: Colors.transparent,
-                                    animateFromLastPercent: true,
-                                    animation: true,
-                                    animationDuration: 600,
-                                    center: value.status == TimerStatus.running
-                                        ? null
-                                        : Icon(
-                                            Icons.play_arrow_rounded,
-                                            size: radius,
-                                          ),
-                                  ),
-                                ),
+                              CustomIndicator(
+                                percent: value.remaining / totalPeriod,
+                                radius: radius,
+                                controller: _controller!,
+                                child: Container(),
                               ),
                               const SizedBox(
                                 height: 20,
@@ -233,19 +177,30 @@ class _HomePageState extends State<HomePage> {
                                 height: isPhone ? 10 : 5,
                               ),
                               InkWell(
-                                onTap: () {
-                                  if (value.status != TimerStatus.running) {
-                                    //change pomodoro when timer not running
-                                    changePomodoro();
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                onTap: value.status != TimerStatus.running
+                                    ? () => changePomodoro()
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.only(
+                                    right: 20,
+                                    left: 10,
+                                    top: 5,
+                                    bottom: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.white12,
+                                  ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.unfold_more_rounded),
+                                      Container(
+                                        margin:
+                                            const EdgeInsets.only(right: 10),
+                                        child: const Icon(
+                                            Icons.unfold_more_rounded),
+                                      ),
                                       Text(
                                         currentPomodoro.name,
                                         style: TextStyle(
