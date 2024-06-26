@@ -67,11 +67,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             onTap: () {
                               showSettingDialog(p);
                             },
-                            child: Container(
-                              height: width,
-                              width: width,
-                              padding: const EdgeInsets.all(10),
-                              child: Card(
+                            child: Card(
+                              child: Container(
+                                height: width,
+                                width: width,
+                                padding: const EdgeInsets.all(10),
                                 child: Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
