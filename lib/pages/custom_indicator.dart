@@ -5,7 +5,7 @@ class CustomIndicator extends StatefulWidget {
   final double radius;
   final double percent;
   final TimerController controller;
-  final Widget child;
+  final Widget? child;
   const CustomIndicator({
     super.key,
     required this.radius,
@@ -92,7 +92,7 @@ class _CustomIndicatorState extends State<CustomIndicator>
                 Icon(
                   Icons.play_arrow_rounded,
                   size: 0.7 * radius,
-                )
+                ),
             ],
           ),
         ),
