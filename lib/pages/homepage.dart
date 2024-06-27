@@ -103,25 +103,28 @@ class _HomePageState extends State<HomePage> {
                     appBar: AppBar(
                       backgroundColor: Colors.transparent,
                       actions: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context)
-                                .push(
-                                  CupertinoPageRoute(
-                                    builder: (context) => const SettingsPage(),
-                                  ),
-                                )
-                                .then((_) => {
-                                      setState(() {
-                                        dailyGoal = prefs.getInt("dailygoal")!;
-                                      })
-                                    });
-                          },
-                          icon: Icon(
-                            Icons.settings_rounded,
-                            color: text,
-                          ),
-                        )
+                        if (!kIsWeb)
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .push(
+                                    CupertinoPageRoute(
+                                      builder: (context) =>
+                                          const SettingsPage(),
+                                    ),
+                                  )
+                                  .then((_) => {
+                                        setState(() {
+                                          dailyGoal =
+                                              prefs.getInt("dailygoal")!;
+                                        })
+                                      });
+                            },
+                            icon: Icon(
+                              Icons.settings_rounded,
+                              color: text,
+                            ),
+                          )
                       ],
                     ),
                     body: Center(
