@@ -4,7 +4,7 @@ Focus Flow Timer is a productivity tool based on the Pomodoro Technique, designe
 
 ## MVP Live Demo
 
-Check out the live MVP version of Focus Flow Timer [here](https://focus-flow-timer.netlify.app/). Will publish the android app soon.
+Check out the live MVP version of Focus Flow Timer [here](https://focus-flow-timer.netlify.app/). This is just the MVP. All features not implemented.
 
 ## Features
 
