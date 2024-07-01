@@ -1,0 +1,32 @@
+name: pomodoro
+description: "A new Flutter project."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^3.0.0
+  shared_preferences: ^2.2.3
+  timer_controller: ^1.0.0
+  percent_indicator: ^4.2.3
+  google_fonts: ^4.0.4
+  flutter_svg: ^2.0.9
+  flutter_web_frame: ^1.0.0
+  assets_audio_player: ^3.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/audio/bell.mp3
+    - assets/images/work_block.svg
+    - assets/images/break_block.svg
+    - assets/images/pomodoro_logo.svg
