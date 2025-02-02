@@ -157,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             Colors.indigo.shade300,
                             const Color(0xFF90CAF9),
                             Colors.green.shade300,
-                            const Color(0xFFFFD558),
+                            const Color(0xFFE9CA6D),
                             Colors.orange.shade300,
                             const Color(0xFFEF9A9A),
                             Colors.grey.shade700,
