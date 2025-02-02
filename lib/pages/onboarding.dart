@@ -53,13 +53,10 @@ class _OnBoardingState extends State<OnBoarding> {
                       },
                       itemBuilder: (context, index) {
                         if (index >= data.length) {
-                          double minDimension = min(height, width);
-                          double divisor = isPhone
-                              ? 3
-                              : minDimension > 500
-                                  ? 8
-                                  : 5;
-                          double radius = minDimension / divisor;
+                          var size = MediaQuery.of(context).size;
+                          double minDimension = min(size.width, size.height);
+                          double radius =
+                              min(90, minDimension / (isPhone ? 3 : 6));
                           return SizedBox(
                             child: Center(
                               child: Column(
@@ -67,8 +64,8 @@ class _OnBoardingState extends State<OnBoarding> {
                                 children: [
                                   Center(
                                     child: Container(
-                                      height: radius * 2.3,
-                                      width: radius * 2.3,
+                                      height: radius * 2.2,
+                                      width: radius * 2.2,
                                       decoration: BoxDecoration(
                                         borderRadius:
                                             BorderRadius.circular(radius * 2),
@@ -78,33 +75,57 @@ class _OnBoardingState extends State<OnBoarding> {
                                               width: radius / 20),
                                         ),
                                       ),
-                                      child: CircularPercentIndicator(
-                                        radius: radius,
-                                        lineWidth: radius,
-                                        progressColor: Colors.white,
-                                        backgroundColor: Colors.transparent,
-                                        percent: index == data.length ? 0 : 1,
-                                        center: index == data.length
-                                            ? IconButton(
-                                                icon: Icon(
-                                                  Icons.play_arrow_rounded,
-                                                  size: radius,
-                                                ),
-                                                onPressed: () {},
-                                              )
-                                            : null,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                                  duration: Duration(
+                                                      milliseconds: 500),
+                                                  content: Text("Paused")));
+                                        },
+                                        onLongPress: () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                                  duration: Duration(
+                                                      milliseconds: 500),
+                                                  content: Text("Reset")));
+                                        },
+                                        child: CircularPercentIndicator(
+                                          radius: radius,
+                                          lineWidth: radius,
+                                          progressColor: index == data.length
+                                              ? Colors.transparent
+                                              : Colors.white,
+                                          backgroundColor: Colors.transparent,
+                                          percent: 1,
+                                          center: index == data.length
+                                              ? IconButton(
+                                                  iconSize: radius,
+                                                  onPressed: () {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                            const SnackBar(
+                                                                duration: Duration(
+                                                                    milliseconds:
+                                                                        500),
+                                                                content: Text(
+                                                                    "Start")));
+                                                  },
+                                                  icon: const Icon(
+                                                    Icons.play_arrow_rounded,
+                                                  ),
+                                                )
+                                              : null,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
                                   Visibility(
                                     visible: index == data.length,
-                                    child: Text(
-                                      "Tap play to start or resume",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium,
-                                    ),
+                                    child: const Text(
+                                        "Tap play to start or resume",
+                                        style: TextStyle(fontSize: 20)),
                                   ),
                                   Visibility(
                                     visible: index == data.length + 1,

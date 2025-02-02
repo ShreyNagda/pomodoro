@@ -7,6 +7,7 @@ import 'package:pomodoro/pages/homepage.dart';
 import 'package:pomodoro/pages/onboarding.dart';
 import 'package:pomodoro/utils/globals.dart';
 import 'package:pomodoro/utils/pomodoro.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 late List<Pomodoro> pomodoros;
@@ -29,13 +30,20 @@ Future<void> main() async {
     prefs.setInt("dailycomplete", 0);
   }
 
+  if (!prefs.containsKey("primary")) {
+    prefs.setInt("primary", 0xFFFE7A8B);
+  }
+
   if (prefs.getInt("refreshtime")! < DateTime.now().weekday ||
       (prefs.getInt("refreshtime")! == 7 && DateTime.now().weekday == 1)) {
     prefs.setInt("dailycomplete", 0);
     prefs.setInt("refreshtime", DateTime.now().weekday);
   }
   await getPomodoros();
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeProvider(),
+    child: const MyApp(),
+  ));
 }
 
 Future<void> getPomodoros() async {
@@ -58,7 +66,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pomodoro | Shrey Nagda',
-      theme: CustomTheme.lightThemeData,
+      theme: Provider.of<ThemeProvider>(context).themeData,
       home:
           prefs.getBool("onboarding")! ? const OnBoarding() : const HomePage(),
       debugShowCheckedModeBanner: false,
@@ -66,10 +74,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class CustomTheme {
-  static ThemeData lightThemeData = ThemeData(
-      primaryColor: primary,
-      scaffoldBackgroundColor: primary,
+class ThemeProvider extends ChangeNotifier {
+  Color _backgroundColor = Colors.red.shade200;
+
+  ThemeProvider() {
+    _loadTheme();
+  }
+
+  Color get backgroundColor => _backgroundColor;
+
+  ThemeData get themeData => ThemeData(
+      primaryColor: _backgroundColor,
+      scaffoldBackgroundColor: _backgroundColor,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         centerTitle: true,
@@ -84,4 +100,14 @@ class CustomTheme {
         displayColor: text,
       ),
       cardTheme: const CardTheme(color: Colors.white24));
+  void _loadTheme() {
+    _backgroundColor = Color(prefs.getInt("primary") ?? 0xFFFE7A8B);
+    notifyListeners();
+  }
+
+  void setBackgroundColor(Color color) async {
+    _backgroundColor = color;
+    await prefs.setInt("primary", color.value);
+    notifyListeners();
+  }
 }

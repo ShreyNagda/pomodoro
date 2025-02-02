@@ -2,7 +2,7 @@ import 'package:pomodoro/utils/pomodoro.dart';
 
 import 'package:flutter/material.dart';
 
-Color primary = const Color.fromARGB(255, 254, 122, 139);
+Color primary = const Color(0xFFFE7A8B);
 Color text = Colors.white;
 
 List<Pomodoro> defaultPomodoros = [
