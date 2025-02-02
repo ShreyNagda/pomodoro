@@ -148,10 +148,11 @@ class _OnBoardingState extends State<OnBoarding> {
                   Row(
                     children: [
                       OnBoardingButton(
-                        onTap: () {
-                          pageController.previousPage(
-                              duration: animationDuration, curve: Curves.ease);
-                        },
+                        onTap: () => pageIndex == 0
+                            ? null
+                            : pageController.previousPage(
+                                duration: animationDuration,
+                                curve: Curves.ease),
                         child: const Icon(
                           Icons.arrow_back_ios_rounded,
                         ),

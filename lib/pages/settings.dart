@@ -36,7 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = min(MediaQuery.of(context).size.width / 4, 100);
+    double width = min(MediaQuery.of(context).size.width / 3, 130);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -54,7 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Center(
           child: SizedBox(
             // color: Colors.amber,
-            width: min(400, MediaQuery.of(context).size.width),
+            width: min(500, MediaQuery.of(context).size.width),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -76,12 +76,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        p.name,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
-                                      ),
+                                      Text(p.name,
+                                          style: const TextStyle(fontSize: 18)),
                                       Text(
                                         '${p.period}',
                                         style: Theme.of(context)

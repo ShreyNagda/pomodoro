@@ -17,6 +17,7 @@ dependencies:
   flutter_svg: ^2.0.9
   flutter_web_frame: ^1.0.0
   assets_audio_player: ^3.1.1
+  flutter_launcher_icons: ^0.14.2
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,6 @@ flutter:
     - assets/images/work_block.svg
     - assets/images/break_block.svg
     - assets/images/pomodoro_logo.svg
+flutter_icons:
+  image_path: "assets/images/logo.png"
+  android: true

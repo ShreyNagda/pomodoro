@@ -64,7 +64,7 @@ class _CustomIndicatorState extends State<CustomIndicator>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radius * 2),
           border: Border.fromBorderSide(
-            BorderSide(color: Colors.white, width: 0.1 * radius),
+            BorderSide(color: Colors.white, width: 0.07 * radius),
           ),
           // color: Colors.amber,
         ),
@@ -75,10 +75,27 @@ class _CustomIndicatorState extends State<CustomIndicator>
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 1500),
-                child: CircularProgressIndicator(
-                  strokeWidth: radius * 0.8,
+              // AnimatedContainer(
+              //   curve: Curves.easeInOut,
+              //   duration: const Duration(milliseconds: 2000),
+              //   child: CircularProgressIndicator(
+              //     strokeWidth: radius * 0.9,
+              //     value: controller.value.status == TimerStatus.initial ||
+              //             controller.value.status == TimerStatus.finished
+              //         ? 0
+              //         : widget.percent,
+              //     color: controller.value.status == TimerStatus.paused
+              //         ? Colors.white24
+              //         : Colors.white,
+              //   ),
+              // ),
+              TweenAnimationBuilder(
+                tween: Tween<double>(
+                    begin: controller.value.remaining.toDouble(), end: 0),
+                duration: const Duration(milliseconds: 1),
+                curve: Curves.easeInOut,
+                builder: (context, value, _) => CircularProgressIndicator(
+                  strokeWidth: radius * 0.9,
                   value: controller.value.status == TimerStatus.initial ||
                           controller.value.status == TimerStatus.finished
                       ? 0

@@ -24,7 +24,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.white12,
+      backgroundColor: Colors.black38,
       child: Container(
         padding: const EdgeInsets.all(10),
         width: 300,
@@ -70,19 +70,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             iconSize: 25),
                       ],
                     ),
-                    ElevatedButton(
-                        onPressed: () {
-                          // var prevList = prefs.getStringList("pomodoros");
-                          int index = pomodoros
-                              .indexWhere((p) => p.name == pomodoro.name);
-                          Pomodoro newPomdoro =
-                              Pomodoro(name: pomodoro.name, period: value);
-                          pomodoros[index] = newPomdoro;
-                          prefs.setStringList("pomodoros",
-                              pomodoros.map((p) => p.toJson()).toList());
-                          Navigator.pop(context);
-                        },
-                        child: const Text("Save"))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: ElevatedButton(
+                          onPressed: () {
+                            // var prevList = prefs.getStringList("pomodoros");
+                            int index = pomodoros
+                                .indexWhere((p) => p.name == pomodoro.name);
+                            Pomodoro newPomdoro =
+                                Pomodoro(name: pomodoro.name, period: value);
+                            pomodoros[index] = newPomdoro;
+                            prefs.setStringList("pomodoros",
+                                pomodoros.map((p) => p.toJson()).toList());
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Save")),
+                    )
                   ],
                 ),
               ),
