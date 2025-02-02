@@ -31,7 +31,7 @@ Future<void> main() async {
   }
 
   if (!prefs.containsKey("primary")) {
-    prefs.setInt("primary", 0xFFFE7A8B);
+    prefs.setInt("primary", 0xFFEF9A9A);
   }
 
   if (prefs.getInt("refreshtime")! < DateTime.now().weekday ||

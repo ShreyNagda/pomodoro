@@ -141,10 +141,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       BlockPicker(
                           itemBuilder: (color, isCurrentColor, changeColor) {
                             return InkWell(
+                              radius: 10,
                               onTap: changeColor,
                               child: Card(
                                 color: color,
-                                elevation: 2,
+                                elevation: isCurrentColor ? 0 : 2,
                                 child: isCurrentColor
                                     ? const Icon(Icons.check_rounded)
                                     : null,
